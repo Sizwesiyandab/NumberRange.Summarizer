@@ -4,6 +4,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class NumberRangeSummarizer implements INumberRangeSummarizer {
 
@@ -23,33 +26,20 @@ public class NumberRangeSummarizer implements INumberRangeSummarizer {
         if (numbers.isEmpty()) {
             return "";
         }
-        List<Integer>  listNumbers = new ArrayList(numbers);
+        List<String> groupedRanges = numbers.stream()
+                .collect(Collectors.groupingBy(
+                        (Integer num) -> num - new ArrayList(numbers).indexOf(num),
+                        Collectors.toList()
+                ))
+                .values()
+                .stream()
+                .map(group -> {
+                    int start = group.get(0);
+                    int end = group.get(group.size() - 1);
+                    return start == end ? String.valueOf(start) : start + "-" + end;
+                })
+                .collect(Collectors.toList());
 
-        List<String> result = new ArrayList<>();
-        int start = listNumbers.get(0);
-        int end = listNumbers.get(0);
-
-        // Iterate through the numbers to find and group sequential ranges
-        for (int i = 1; i < numbers.size(); i++) {
-            if (listNumbers.get(i) == end + 1) {
-                end = listNumbers.get(i);
-            } else {
-                if (start == end) {
-                    result.add(String.valueOf(start));
-                } else {
-                    result.add(start + "-" + end);
-                }
-                start = end = listNumbers.get(i);
-            }
-        }
-
-        // Add the last range or single number
-        if (start == end) {
-            result.add(String.valueOf(start));
-        } else {
-            result.add(start + "-" + end);
-        }
-
-        return result.toString();
+        return groupedRanges.toString();
     }
 }
